@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "reset": "03:00 Europe/Istanbul",
+  "gateways": [
+    {
+      "id": "grok",
+      "name": "Grok Beta v4",
+      "base": "https://grok-beta-v4.claude.gg",
+      "protocol": "openai",
+      "quota": "proxy pool (beta)",
+      "role": "Ana ajan — Grok 4.6 Max",
+      "clients": ["opencode", "cline", "roo", "cursor-byok"]
+    },
+    {
+      "id": "app",
+      "name": "app.claude.gg",
+      "base": "https://app.claude.gg",
+      "protocol": "openai+anthropic",
+      "quota": "2500/gün · 1000/saat",
+      "role": "Yedek ajan — Sonnet 4.6 thinking",
+      "clients": ["opencode", "claude-code", "cowork", "cline", "roo", "trae"]
+    },
+    {
+      "id": "claude",
+      "name": "claude.gg",
+      "base": "https://claude.gg",
+      "protocol": "openai",
+      "quota": "2500/gün",
+      "role": "Saf Sonnet (IDE için app tercih)",
+      "clients": ["cline"]
+    },
+    {
+      "id": "api",
+      "name": "api.claude.gg",
+      "base": "https://api.claude.gg",
+      "protocol": "openai",
+      "quota": "4000/gün",
+      "role": "GPT / Grok-4 / DeepSeek / Gemini",
+      "clients": ["opencode", "cline", "roo"]
+    },
+    {
+      "id": "llm",
+      "name": "llm.claude.gg",
+      "base": "https://llm.claude.gg",
+      "protocol": "openai",
+      "quota": "2500/gün",
+      "role": "Kimi / Qwen / GLM / DeepSeek V4",
+      "clients": ["opencode", "cline"]
+    },
+    {
+      "id": "llm-v2",
+      "name": "llm-v2.claude.gg",
+      "base": "https://llm-v2.claude.gg",
+      "protocol": "openai",
+      "quota": "2500/gün",
+      "role": "Kimi K3 v2 kısayolları",
+      "clients": ["opencode"]
+    },
+    {
+      "id": "api-v2",
+      "name": "api-v2.claude.gg",
+      "base": "https://api-v2.claude.gg",
+      "protocol": "openai+anthropic",
+      "quota": "web search 5000/gün",
+      "role": "Ox / Laguna / Muse + web search",
+      "clients": ["opencode"]
+    },
+    {
+      "id": "studio",
+      "name": "studio.claude.gg",
+      "base": "https://studio.claude.gg",
+      "protocol": "images+music",
+      "quota": "500/gün medya",
+      "role": "Görsel / müzik — ajan aracı, IDE modeli değil",
+      "clients": ["opencode-mcp"]
+    },
+    {
+      "id": "core",
+      "name": "core.claude.gg",
+      "base": "https://core.claude.gg",
+      "protocol": "async jobs",
+      "quota": "1000 medya + 2500 metin/gün",
+      "role": "Video / görsel / TTS — ajan aracı",
+      "clients": ["opencode-mcp"]
+    }
+  ],
+  "probes": [
+    {"gateway": "grok", "model": "grok-4.6-max", "name": "Grok 4.6 Max"},
+    {"gateway": "app", "model": "claude-sonnet-4-6-thinking", "name": "Sonnet 4.6 Thinking"},
+    {"gateway": "app", "model": "claude-sonnet-4-6", "name": "Sonnet 4.6"},
+    {"gateway": "llm-v2", "model": "kimi", "name": "Kimi K3 v2"},
+    {"gateway": "api-v2", "model": "ox-alpha", "name": "Ox Alpha"},
+    {"gateway": "api-v2", "model": "laguna-s-2.1", "name": "Laguna S 2.1"},
+    {"gateway": "llm", "model": "moonshotai/Kimi-K3", "name": "Kimi K3"}
+  ],
+  "clients": [
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "files": ["~/.config/opencode/opencode.json", "~/.config/opencode/cortex.env"]
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code CLI",
+      "files": ["~/.claude/settings.json"]
+    },
+    {
+      "id": "cowork",
+      "name": "Claude Desktop / Cowork",
+      "files": ["Developer → Third-Party Inference"]
+    },
+    {
+      "id": "cline",
+      "name": "Cline (VS Code)",
+      "files": ["~/.cline/data/settings/providers.json"]
+    },
+    {
+      "id": "roo",
+      "name": "Roo / Zoo Code",
+      "files": ["VS Code settings: OpenAI Compatible"]
+    },
+    {
+      "id": "cursor-byok",
+      "name": "cursor-byok / Cursor Assistant",
+      "files": ["Model Settings → import preset"]
+    },
+    {
+      "id": "trae",
+      "name": "TRAE",
+      "files": ["Settings → Models → Custom Config"]
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "grok/grok-4.6-max",
+  "small_model": "grok/grok-4.6-max",
+  "plugins": [
+    "./plugins/cortex.ts",
+    "./plugins/cortex-fallback.ts"
+  ],
+  "agents": {
+    "build": {
+      "model": "grok/grok-4.6-max"
+    },
+    "plan": {
+      "model": "grok/grok-4.6-max"
+    },
+    "general": {
+      "model": "grok/grok-4.6-max"
+    },
+    "explore": {
+      "model": "grok/grok-4.6-max"
+    }
+  },
+  "mcp": {
+    "timeout": {
+      "startup": 45000,
+      "catalog": 30000,
+      "execution": 1800000
+    },
+    "servers": {
+      "cortex": {
+        "type": "local",
+        "command": [
+          "python",
+          "mcp/server.py"
+        ],
+        "environment": {
+          "PYTHONIOENCODING": "utf-8",
+          "CORTEX_API_KEY": "{env:CORTEX_API_KEY}"
+        },
+        "codemode": false,
+        "cwd": "."
+      }
+    }
+  },
+  "providers": {
+    "app-cortex": {
+      "name": "App - Cortex (Sonnet 4.6)",
+      "package": "@opencode-ai/ai/providers/openai/chat",
+      "env": [
+        "CORTEX_API_KEY",
+        "OPENAI_API_KEY"
+      ],
+      "settings": {
+        "baseURL": "https://app.claude.gg"
+      },
+      "models": {
+        "claude-sonnet-4-6-thinking": {
+          "modelID": "claude-sonnet-4-6-thinking",
+          "name": "Sonnet 4.6 Thinking"
+        },
+        "claude-sonnet-4-6": {
+          "modelID": "claude-sonnet-4-6",
+          "name": "Sonnet 4.6"
+        }
+      }
+    },
+    "api-cortex": {
+      "name": "API - Cortex (GPT / Grok / DeepSeek)",
+      "package": "@opencode-ai/ai/providers/openai/chat",
+      "env": [
+        "CORTEX_API_KEY",
+        "OPENAI_API_KEY"
+      ],
+      "settings": {
+        "baseURL": "https://api.claude.gg"
+      },
+      "models": {
+        "gpt-5": {
+          "modelID": "gpt-5",
+          "name": "GPT-5"
+        },
+        "gpt-5.1": {
+          "modelID": "gpt-5.1",
+          "name": "GPT-5.1"
+        },
+        "grok-4": {
+          "modelID": "grok-4",
+          "name": "Grok 4"
+        },
+        "deepseek-chat": {
+          "modelID": "deepseek-chat",
+          "name": "DeepSeek Chat"
+        },
+        "gemini-3-pro": {
+          "modelID": "gemini-3-pro",
+          "name": "Gemini 3 Pro"
+        }
+      }
+    },
+    "llm-cortex": {
+      "name": "LLM - Cortex (Kimi / Qwen / GLM)",
+      "package": "@opencode-ai/ai/providers/openai/chat",
+      "env": [
+        "CORTEX_API_KEY",
+        "OPENAI_API_KEY"
+      ],
+      "settings": {
+        "baseURL": "https://llm.claude.gg"
+      },
+      "models": {
+        "kimi-k3": {
+          "modelID": "moonshotai/Kimi-K3",
+          "name": "Kimi K3"
+        },
+        "qwen35": {
+          "modelID": "Qwen/Qwen3.5-397B-A17B",
+          "name": "Qwen 3.5 397B"
+        },
+        "glm-5.2": {
+          "modelID": "zai-org/GLM-5.2",
+          "name": "GLM 5.2"
+        },
+        "deepseek-v4-flash": {
+          "modelID": "deepseek-ai/DeepSeek-V4-Flash",
+          "name": "DeepSeek V4 Flash"
+        }
+      }
+    },
+    "llmv2-cortex": {
+      "name": "LLMv2 - Cortex",
+      "package": "@opencode-ai/ai/providers/openai/chat",
+      "env": [
+        "CORTEX_API_KEY",
+        "OPENAI_API_KEY"
+      ],
+      "settings": {
+        "baseURL": "https://llm-v2.claude.gg"
+      },
+      "models": {
+        "kimi": {
+          "modelID": "kimi",
+          "name": "Kimi K3 v2"
+        }
+      }
+    },
+    "apiv2-cortex": {
+      "name": "API-v2 - Cortex (Ox / Laguna / Muse)",
+      "package": "@opencode-ai/ai/providers/openai/chat",
+      "env": [
+        "CORTEX_API_KEY",
+        "OPENAI_API_KEY"
+      ],
+      "settings": {
+        "baseURL": "https://api-v2.claude.gg"
+      },
+      "models": {
+        "ox-alpha": {
+          "modelID": "ox-alpha",
+          "name": "Ox Alpha"
+        },
+        "laguna-s-2.1": {
+          "modelID": "laguna-s-2.1",
+          "name": "Laguna S 2.1"
+        },
+        "muse-spark-1.2": {
+          "modelID": "muse-spark-1.2",
+          "name": "Muse Spark 1.2"
+        },
+        "mimo-v2.5": {
+          "modelID": "mimo-v2.5",
+          "name": "MiMo V2.5"
+        }
+      }
+    },
+    "grok": {
+      "name": "Grok Beta v4 (ana ajan)",
+      "package": "@opencode-ai/ai/providers/openai/chat",
+      "env": [
+        "CORTEX_API_KEY",
+        "OPENAI_API_KEY"
+      ],
+      "settings": {
+        "baseURL": "https://grok-beta-v4.claude.gg"
+      },
+      "models": {
+        "grok-4.6-max": {
+          "modelID": "grok-4.6-max",
+          "name": "Grok 4.6 Max",
+          "capabilities": {
+            "tools": true,
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 450000,
+            "output": 32768
+          },
+          "settings": {
+            "reasoningEffort": "xhigh"
+          },
+          "body": {
+            "reasoning_effort": "xhigh"
+          }
+        },
+        "grok-4.6": {
+          "modelID": "grok-4.6",
+          "name": "Grok 4.6"
+        }
+      }
+    }
+  }
+}

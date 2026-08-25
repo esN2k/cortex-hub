@@ -1,0 +1,24 @@
+# Secrets — never commit
+cortex.env
+*.env
+.env*
+!.env.example
+
+# Runtime
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+cortex-out/
+hub/data/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local OpenCode service password
+service.json

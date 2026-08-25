@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cortex Hub</title>
+  <style>
+    :root {
+      --bg: #1a1b1e;
+      --bg2: #141517;
+      --panel: #202124;
+      --line: #2c2e33;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+      --ok: #3dd68c;
+      --ok-bg: #163528;
+      --err: #f28b82;
+      --err-bg: #3c1f1c;
+      --warn: #fdd663;
+      --accent: #8ab4f8;
+      --hover: #2a2c31;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 13px/1.45 "Segoe UI", system-ui, sans-serif; }
+    .app { display: grid; grid-template-columns: 220px 1fr; height: 100%; }
+    aside {
+      background: var(--bg2);
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .brand { font-weight: 650; font-size: 13px; padding: 6px 10px 16px; letter-spacing: .2px; }
+    .brand span { color: var(--muted); font-weight: 400; }
+    nav button {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; text-align: left; border: 0; background: transparent;
+      color: var(--text); padding: 8px 10px; border-radius: 8px; cursor: pointer; font: inherit;
+    }
+    nav button:hover { background: var(--hover); }
+    nav button.active { background: #2b3038; }
+    nav .sep { color: var(--muted); font-size: 11px; padding: 14px 10px 6px; text-transform: uppercase; letter-spacing: .08em; }
+    main { padding: 22px 28px; overflow: auto; }
+    h1 { font-size: 20px; font-weight: 600; margin: 0 0 16px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn {
+      background: #2b3038; color: var(--text); border: 1px solid var(--line);
+      border-radius: 8px; padding: 6px 12px; cursor: pointer; font: inherit;
+    }
+    .btn:hover { border-color: #4a4e57; }
+    .btn.primary { background: #3c4a63; border-color: #4d5f7d; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; font-size: 12px; }
+    .pill {
+      display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    }
+    .pill.ok { background: var(--ok-bg); color: var(--ok); }
+    .pill.err { background: var(--err-bg); color: var(--err); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+    }
+    .card h3 { margin: 0 0 6px; font-size: 14px; }
+    .muted { color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot.ok { background: var(--ok); }
+    .dot.err { background: var(--err); }
+    .dot.warn { background: var(--warn); }
+    pre {
+      background: #111214; border: 1px solid var(--line); border-radius: 8px;
+      padding: 12px; overflow: auto; white-space: pre-wrap; font-size: 12px;
+    }
+    .row-actions button { margin-right: 6px; }
+    .hidden { display: none; }
+    .guide { display: grid; gap: 12px; }
+    textarea { width: 100%; min-height: 80px; background: #111214; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font: inherit; }
+    .toast { position: fixed; bottom: 16px; right: 16px; background: #2b3038; border: 1px solid var(--line); padding: 10px 14px; border-radius: 8px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">Cortex Hub <span>v0.1</span></div>
+      <nav>
+        <button data-view="overview" class="active">Overview</button>
+        <button data-view="history">Call history</button>
+        <button data-view="providers">Providers</button>
+        <button data-view="setup">User guide</button>
+        <div class="sep">Tools</div>
+        <button data-view="studio">Studio</button>
+        <button data-view="report">Bug report</button>
+      </nav>
+    </aside>
+    <main>
+      <section id="view-overview">
+        <div class="toolbar">
+          <h1>Overview</h1>
+          <div>
+            <button class="btn" id="btn-quota">Kota yenile</button>
+            <button class="btn primary" id="btn-probe-all">Tüm modelleri dene</button>
+          </div>
+        </div>
+        <p class="muted" id="health-line">Yükleniyor…</p>
+        <div class="cards" id="quota-cards"></div>
+      </section>
+      <section id="view-history" class="hidden">
+        <div class="toolbar">
+          <h1>Calls</h1>
+          <button class="btn" id="btn-refresh-hist">Yenile</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Status</th><th>Display name</th><th>Gateway</th><th>Time</th><th>ms</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="hist-body"></tbody>
+        </table>
+      </section>
+      <section id="view-providers" class="hidden">
+        <h1>Providers</h1>
+        <p class="muted">Canlı katalog + nereye kurulur. Medya uçları (studio/core) IDE modeli değil, ajan aracı.</p>
+        <div class="cards" id="prov-cards"></div>
+      </section>
+      <section id="view-setup" class="hidden">
+        <h1>User guide</h1>
+        <p class="muted">Yeni gelen: anahtarı cortex.env’e koy, uygulamayı seç, snippet’i yapıştır. Tek anahtar tüm uçlarda.</p>
+        <div class="guide" id="setup-guide"></div>
+      </section>
+      <section id="view-studio" class="hidden">
+        <div class="toolbar">
+          <h1>Studio</h1>
+          <button class="btn" id="btn-media-refresh">Medya yenile</button>
+        </div>
+        <p class="muted">core.claude.gg — görsel, video, TTS, müzik. Kota düşer. Çıktı cortex-out/.</p>
+        <div class="cards">
+          <div class="card">
+            <h3>Görsel</h3>
+            <textarea id="img-prompt" placeholder="prompt…">dark professional dashboard, Cortex Hub, 16:9</textarea>
+            <p><button class="btn primary" data-studio="image">Üret</button></p>
+          </div>
+          <div class="card">
+            <h3>Video (4–15 sn)</h3>
+            <textarea id="vid-prompt" placeholder="sahne…">cinematic dark UI dashboard dolly, 5 seconds</textarea>
+            <p><button class="btn primary" data-studio="video">Üret</button></p>
+          </div>
+          <div class="card">
+            <h3>Konuşma (TTS)</h3>
+            <textarea id="spk-prompt" placeholder="metin…">Cortex Hub. Tek anahtar, bütün uçlar.</textarea>
+            <p><button class="btn primary" data-studio="speech">Üret</button></p>
+          </div>
+          <div class="card">
+            <h3>Müzik</h3>
+            <textarea id="mus-prompt" placeholder="tarz…">cinematic tech pulse, instrumental</textarea>
+            <p><button class="btn primary" data-studio="music">Üret</button></p>
+          </div>
+        </div>
+        <p class="muted" id="studio-status"></p>
+        <div id="media-grid" class="cards"></div>
+      </section>
+      <section id="view-report" class="hidden">
+        <h1>Bug report</h1>
+        <p class="muted">Anahtar ve prompt yok. Forum / Discord’a yapıştır.</p>
+        <p>
+          <label>Call id (history’den göz ikonu) <input id="report-id" style="width:280px;background:#111;color:#eee;border:1px solid var(--line);padding:6px;border-radius:6px" /></label>
+        </p>
+        <p>Notlar</p>
+        <textarea id="report-notes" placeholder="Ne yaptın, beklenen, hangi uygulama (OpenCode / Cline / Claude Code)…"></textarea>
+        <p><button class="btn primary" id="btn-report">Rapor üret</button> <button class="btn" id="btn-copy">Kopyala</button></p>
+        <pre id="report-out">(henüz yok)</pre>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function toast(t) {
+      const el = $("toast");
+      el.textContent = t;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 2200);
+    }
+    function show(view) {
+      document.querySelectorAll("main > section").forEach((s) => s.classList.add("hidden"));
+      document.getElementById("view-" + view).classList.remove("hidden");
+      document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+    }
+    document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => {
+      show(b.dataset.view);
+      history.replaceState(null, "", "?view=" + b.dataset.view);
+    }));
+    const qview = new URLSearchParams(location.search).get("view");
+    if (qview) show(qview);
+
+    async function jget(url) {
+      const r = await fetch(url);
+      return r.json();
+    }
+    async function jpost(url, body) {
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+      return r.json();
+    }
+
+    function remaining(block) {
+      if (!block) return null;
+      const d = block.data && (block.data.data && block.data.data.rate_limit || block.data.rate_limit || block.data.daily || (block.data.rate_limit && block.data.rate_limit.daily));
+      if (block.data && block.data.daily && block.data.daily.remaining != null) return { rem: block.data.daily.remaining, lim: block.data.daily.limit, used: block.data.daily.used };
+      if (block.data && block.data.rate_limit && block.data.rate_limit.daily) {
+        const x = block.data.rate_limit.daily;
+        return { rem: x.remaining, lim: x.limit, used: x.used };
+      }
+      if (block.data && block.data.success && block.data.data && block.data.data.rate_limit) {
+        const x = block.data.data.rate_limit;
+        return { rem: x.remaining, lim: x.limit, used: x.used };
+      }
+      return null;
+    }
+
+    async function loadQuota() {
+      const h = await jget("/api/health");
+      $("health-line").textContent = h.key ? ("Anahtar var · " + h.time) : "Anahtar YOK — ~/.config/opencode/cortex.env";
+      const q = await jget("/api/quota");
+      const map = [
+        ["app.claude.gg", "app.claude.gg", "Sonnet yedek"],
+        ["claude.gg", "claude.gg", "Sonnet saf"],
+        ["api.claude.gg", "api.claude.gg", "GPT/Grok/DS"],
+        ["llm.claude.gg", "llm.claude.gg", "Kimi/Qwen"],
+        ["studio.usage", "studio", "görsel/müzik"],
+        ["core.me", "core medya", "video/görsel/TTS"],
+      ];
+      const html = map.map(([k, title, sub]) => {
+        const block = q[k];
+        const r = remaining(block);
+        const http = block && block.http;
+        const ok = http === 200;
+        let body = ok ? "HTTP 200" : ("HTTP " + (http || "?"));
+        if (r) body = (r.used || 0) + " / " + r.lim + "  ·  kalan " + r.rem;
+        if (k === "core.me" && block && block.data && block.data.rate_limit) {
+          const d = block.data.rate_limit.daily || {};
+          const t = (block.data.rate_limit.text && block.data.rate_limit.text.daily) || {};
+          body = "medya " + (d.used||0) + "/" + d.limit + " · metin " + (t.used||0) + "/" + t.limit;
+        }
+        return `<div class="card"><h3><span class="dot ${ok ? "ok" : "err"}"></span>${title}</h3><div class="muted">${sub}</div><div style="margin-top:8px">${body}</div></div>`;
+      }).join("");
+      $("quota-cards").innerHTML = html;
+    }
+
+    function renderHist(rows) {
+      $("hist-body").innerHTML = (rows || []).map((r) => {
+        const pill = r.ok ? `<span class="pill ok">completed</span>` : `<span class="pill err">error</span>`;
+        return `<tr>
+          <td>${pill}</td>
+          <td>${r.name || r.model}</td>
+          <td class="muted">${r.gateway}</td>
+          <td>${r.time || ""}</td>
+          <td>${r.ms ?? ""}</td>
+          <td class="row-actions">
+            <button class="btn" data-report="${r.id}">Rapor</button>
+            <button class="btn" data-retry="${r.gateway}|${r.model}|${r.name}">Tekrar</button>
+          </td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="6" class="muted">Henüz probe yok. Overview → Tüm modelleri dene.</td></tr>`;
+      $("hist-body").querySelectorAll("[data-report]").forEach((b) => b.addEventListener("click", () => {
+        $("report-id").value = b.dataset.report;
+        show("report");
+        makeReport();
+      }));
+      $("hist-body").querySelectorAll("[data-retry]").forEach((b) => b.addEventListener("click", async () => {
+        const [gateway, model, name] = b.dataset.retry.split("|");
+        toast("Probe…");
+        await jpost("/api/probe", { gateway, model, name });
+        await loadHist();
+      }));
+    }
+
+    async function loadHist() {
+      const d = await jget("/api/history");
+      renderHist(d.rows);
+    }
+
+    async function loadProviders() {
+      const d = await jget("/api/catalog");
+      const live = d.live || {};
+      const gws = (d.static && d.static.gateways) || [];
+      $("prov-cards").innerHTML = gws.map((g) => {
+        const L = live[g.id] || {};
+        const n = L.count;
+        const http = L.http;
+        const ok = http === 200;
+        return `<div class="card">
+          <h3><span class="dot ${ok ? "ok" : (http ? "err" : "warn")}"></span>${g.name}</h3>
+          <div class="muted">${g.base}</div>
+          <div style="margin-top:8px">${g.role}</div>
+          <div class="muted">kota: ${g.quota} · protokol: ${g.protocol}</div>
+          <div class="muted">istemci: ${(g.clients || []).join(", ")}</div>
+          <div style="margin-top:6px">${ok ? (n + " model canlı") : ("katalog HTTP " + (http || "—"))}</div>
+        </div>`;
+      }).join("");
+    }
+
+    async function loadSetup() {
+      const d = await jget("/api/setup");
+      $("setup-guide").innerHTML = Object.values(d).map((s) => `
+        <div class="card">
+          <h3>${s.title}</h3>
+          <ol>${(s.steps || []).map((x) => `<li>${x}</li>`).join("")}</ol>
+          <pre>${(s.snippet || "").replace(/</g, "&lt;")}</pre>
+        </div>`).join("");
+    }
+
+    async function makeReport() {
+      const id = $("report-id").value.trim();
+      const notes = $("report-notes").value;
+      const d = await jpost("/api/report", { id, notes });
+      $("report-out").textContent = d.markdown || JSON.stringify(d, null, 2);
+    }
+
+    $("btn-quota").addEventListener("click", () => loadQuota().then(() => toast("Kota güncellendi")));
+    $("btn-probe-all").addEventListener("click", async () => {
+      toast("Probe başladı (birkaç saniye)…");
+      await jpost("/api/probe", { all: true });
+      await loadHist();
+      show("history");
+      toast("Probe bitti");
+    });
+    $("btn-refresh-hist").addEventListener("click", loadHist);
+    $("btn-report").addEventListener("click", makeReport);
+    $("btn-copy").addEventListener("click", async () => {
+      await navigator.clipboard.writeText($("report-out").textContent);
+      toast("Kopyalandı");
+    });
+
+    async function loadMedia() {
+      const d = await jget("/api/media");
+      $("media-grid").innerHTML = (d.items || []).map((it) => {
+        const lower = it.name.toLowerCase();
+        let preview = `<div class="muted">${it.name} · ${it.bytes} B</div>`;
+        if (lower.endsWith(".jpg") || lower.endsWith(".png") || lower.endsWith(".jpeg")) {
+          preview = `<img src="${it.url}" alt="" style="width:100%;border-radius:8px" /><div class="muted">${it.name}</div>`;
+        } else if (lower.endsWith(".mp3") || lower.endsWith(".wav")) {
+          preview = `<audio controls src="${it.url}" style="width:100%"></audio><div class="muted">${it.name}</div>`;
+        } else if (lower.endsWith(".mp4")) {
+          preview = `<video controls src="${it.url}" style="width:100%;border-radius:8px"></video><div class="muted">${it.name}</div>`;
+        }
+        return `<div class="card">${preview}</div>`;
+      }).join("") || `<p class="muted">Henüz medya yok.</p>`;
+    }
+
+    document.querySelectorAll("[data-studio]").forEach((b) => b.addEventListener("click", async () => {
+      const kind = b.dataset.studio;
+      const map = { image: "img-prompt", video: "vid-prompt", speech: "spk-prompt", music: "mus-prompt" };
+      const prompt = $(map[kind]).value.trim();
+      $("studio-status").textContent = kind + " üretiliyor… (video dakikalar sürebilir)";
+      toast("Üretim başladı");
+      const d = await jpost("/api/studio", { kind, prompt, wait: true });
+      $("studio-status").textContent = JSON.stringify(d.saved || d.error || d.polled || d, null, 2).slice(0, 400);
+      await loadMedia();
+      toast("Bitti");
+    }));
+    $("btn-media-refresh").addEventListener("click", loadMedia);
+
+    loadQuota();
+    loadHist();
+    loadProviders();
+    loadSetup();
+    loadMedia();
+  </script>
+</body>
+</html>

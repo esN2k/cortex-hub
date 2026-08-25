@@ -1,0 +1,39 @@
+{
+  "name": "CortexAI",
+  "models": [
+    {
+      "name": "Grok 4.6 Max",
+      "protocol": "openai",
+      "baseURL": "https://grok-beta-v4.claude.gg",
+      "modelID": "grok-4.6-max",
+      "context": 450000,
+      "maxOutput": 32768,
+      "reasoningEffort": "xhigh"
+    },
+    {
+      "name": "Sonnet 4.6 Thinking",
+      "protocol": "openai",
+      "baseURL": "https://app.claude.gg",
+      "modelID": "claude-sonnet-4-6-thinking",
+      "context": 200000,
+      "maxOutput": 64000,
+      "reasoningEffort": "max"
+    },
+    {
+      "name": "Sonnet 4.6",
+      "protocol": "openai",
+      "baseURL": "https://app.claude.gg",
+      "modelID": "claude-sonnet-4-6",
+      "context": 200000,
+      "maxOutput": 64000
+    },
+    {
+      "name": "Ox Alpha",
+      "protocol": "openai",
+      "baseURL": "https://api-v2.claude.gg",
+      "modelID": "ox-alpha",
+      "context": 1048576,
+      "maxOutput": 131072
+    }
+  ]
+}

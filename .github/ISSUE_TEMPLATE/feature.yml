@@ -1,0 +1,11 @@
+name: Feature
+description: Suggest a client snippet, gateway, or Hub view
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: What should Hub or MCP do? Keep it personal-use (no shared proxy).
+    validations:
+      required: true

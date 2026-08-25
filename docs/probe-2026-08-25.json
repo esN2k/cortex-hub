@@ -1,0 +1,90 @@
+{
+  "ok": 4,
+  "total": 7,
+  "rows": [
+    {
+      "time": "2026-08-25 14:48:41",
+      "gateway": "grok",
+      "model": "grok-4.6-max",
+      "name": "Grok 4.6 Max",
+      "http": 200,
+      "ms": 4711,
+      "ok": true,
+      "status": "completed",
+      "text": "PONG",
+      "error": null
+    },
+    {
+      "time": "2026-08-25 14:48:44",
+      "gateway": "app",
+      "model": "claude-sonnet-4-6-thinking",
+      "name": "Sonnet 4.6 Thinking",
+      "http": 200,
+      "ms": 2764,
+      "ok": true,
+      "status": "completed",
+      "text": "PONG",
+      "error": null
+    },
+    {
+      "time": "2026-08-25 14:48:47",
+      "gateway": "app",
+      "model": "claude-sonnet-4-6",
+      "name": "Sonnet 4.6",
+      "http": 200,
+      "ms": 2707,
+      "ok": true,
+      "status": "completed",
+      "text": "PONG",
+      "error": null
+    },
+    {
+      "time": "2026-08-25 14:49:02",
+      "gateway": "llm-v2",
+      "model": "kimi",
+      "name": "Kimi K3 v2",
+      "http": 402,
+      "ms": 15129,
+      "ok": false,
+      "status": "error",
+      "text": null,
+      "error": "{\"message\": \"Invalid request.\", \"type\": \"invalid_request_error\", \"param\": null, \"code\": \"invalid_request\"}"
+    },
+    {
+      "time": "2026-08-25 14:49:10",
+      "gateway": "api-v2",
+      "model": "ox-alpha",
+      "name": "Ox Alpha",
+      "http": 200,
+      "ms": 7232,
+      "ok": true,
+      "status": "completed",
+      "text": "P",
+      "error": null
+    },
+    {
+      "time": "2026-08-25 14:49:12",
+      "gateway": "api-v2",
+      "model": "laguna-s-2.1",
+      "name": "Laguna S 2.1",
+      "http": 503,
+      "ms": 1975,
+      "ok": false,
+      "status": "error",
+      "text": null,
+      "error": "{\"message\": \"Service temporarily unavailable\", \"type\": \"server_error\", \"param\": null, \"code\": \"service_unavailable\"}"
+    },
+    {
+      "time": "2026-08-25 14:49:19",
+      "gateway": "llm",
+      "model": "moonshotai/Kimi-K3",
+      "name": "Kimi K3",
+      "http": 503,
+      "ms": 6299,
+      "ok": false,
+      "status": "error",
+      "text": null,
+      "error": "{\"message\": \"The service is temporarily unavailable. Please retry shortly.\", \"type\": \"server_error\", \"code\": \"temporarily_unavailable\"}"
+    }
+  ]
+}

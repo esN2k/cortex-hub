@@ -1,0 +1,7 @@
+{
+  "provider": "anthropic",
+  "baseUrl": "https://app.claude.gg",
+  "model": "claude-sonnet-4-6-thinking",
+  "apiKey": "PASTE_CORTEX_KEY",
+  "reasoning": { "effort": "max" }
+}
