@@ -1,20 +1,26 @@
 ---
 name: cortex
-description: CortexAI abonelik araçları — görsel, video, ses, müzik, web arama, kota. Kullanıcı görsel/video/müzik/TTS istediğinde veya güncel web bilgisi gerektiğinde kullan.
+description: CortexAI tools — image, video, speech, music, SFX, search, jury, embeddings, quota. Use when the user wants media, a second-model review, current web facts, or semantic embeddings.
 ---
 
-# Cortex araçları
+# Cortex tools (MCP v1.1)
 
-Beyin: `grok/grok-4.6-max` (ana). Yedek: `app-cortex/claude-sonnet-4-6-thinking`. Medya ve arama **araç** (MCP `cortex_*`).
+Brain: `grok/grok-4.6-max`. Fallback: `app-cortex/claude-sonnet-4-6-thinking`. Media and extra models are **tools**.
 
-- Görsel iste → `cortex_image` (core `seedream-5`; studio `gpt-image-2` alternatif)
-- Video → `cortex_video` (`minimax-h3`, 4–15 sn; dakikalar sürebilir)
-- Konuşma → `cortex_speech` (Türkçe varsayılan)
-- Müzik → `cortex_music`
-- Güncel bilgi → `cortex_web_search` (api-v2, 5000/gün)
-- Kota → `cortex_quota` (üretimden önce bak)
-- Dosya referansı → `cortex_upload` sonra URL’yi image/video’ya ver
+## Do this
 
-Çıktı: `C:\Users\Esen\.config\opencode\cortex-out\`
+- Stills → `cortex_enhance_prompt` then `cortex_image` (`seedream-5-pro` or studio `gemini-3-pro-image` for readable text). Pass `image_urls` for consistency.
+- Edit existing → `cortex_edit` (`remove-bg` / `upscale` / `edit`).
+- Video → still first, then `cortex_video` model `wan-2-6` + `reference_images`, or H3 + `first_frame`.
+- Speech → `cortex_voices` then `cortex_speech` (Turkish default). One-off identity: `cortex_voice_design` / `cortex_voice_clone`.
+- Music → `cortex_music` backend `core`. Lyrics: `cortex_lyrics` then music.
+- SFX → `cortex_sfx`.
+- Facts → `cortex_web_search` then `cortex_fetch` on the URL.
+- Hard call → `cortex_jury` (Grok + Sonnet + Ox in parallel).
+- Notes search → `cortex_embed`.
+- 503 / mystery params → `cortex_status` / `cortex_model_schema`.
+- Quota before a media burst → `cortex_quota`.
 
-Başka modele geçmek için OpenCode model seçici (`grok`, `llmv2-cortex`, `apiv2-cortex`) veya tek seferlik `cortex_chat`.
+Output: `cortex-out/` (3 h on the server — files are saved locally).
+
+Do **not** burn app.claude.gg 2500 on jury/embeddings; those buckets are `api` / `llm` / `grok`.

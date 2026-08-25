@@ -131,13 +131,13 @@ Ayrıntı: [docs/gateways.md](docs/gateways.md) · [docs/clients.md](docs/client
 
 ---
 
-## MCP araçları
+## MCP araçları (22)
 
-OpenCode ve Claude Code stdio:
+OpenCode ve Claude Code stdio — tam liste: [docs/mcp.md](docs/mcp.md)
 
-`cortex_web_search` · `cortex_quota` · `cortex_catalog` · `cortex_image` · `cortex_video` · `cortex_speech` · `cortex_music` · `cortex_voices` · `cortex_upload` · `cortex_job` · `cortex_chat`
+Arama `web_search` + `fetch` · kota / `status` / katalog / `model_schema` · `enhance_prompt` (ücretsiz helper) · görsel (+ referans) · `edit` · video (H3 / wan-2-6 / ilk kare) · TTS · `voice_design` / `voice_clone` · müzik · `lyrics` · `sfx` · upload / job · `chat` · **`jury`** (Grok+Sonnet+Ox) · **`embed`**
 
-Ajan düz Türkçe: «şu görseli üret», «5 sn video», «bunu seslendir», «kota ne kadar».
+Ajan: «şu görseli üret», «arkaplanı sil», «bu kareden video», «üç modele sor», «kota».
 
 Çıktı: `cortex-out/` (gitignore).
 

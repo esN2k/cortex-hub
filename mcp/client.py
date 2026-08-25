@@ -371,3 +371,179 @@ def voices(language: str = "turkish", limit: int = 20) -> dict[str, Any]:
     q = urllib.parse.urlencode({"language": language, "limit": str(limit)})
     status, data, _ = http("GET", f"{CORE}/voices?{q}", timeout=30)
     return {"http": status, "data": data}
+
+
+def resolve_ref(path_or_url: str) -> str:
+    s = (path_or_url or "").strip()
+    if not s:
+        raise ValueError("empty media ref")
+    if s.startswith("http://") or s.startswith("https://"):
+        return s
+    p = Path(s)
+    if not p.is_file():
+        raise FileNotFoundError(s)
+    up = upload(str(p))
+    data = up.get("data") if isinstance(up.get("data"), dict) else {}
+    url = (data or {}).get("absolute_url") or (data or {}).get("url")
+    if not url:
+        raise RuntimeError(f"upload failed: {up}")
+    return url if str(url).startswith("http") else GATEWAYS["core"] + str(url)
+
+
+def resolve_refs(items: list[str] | None) -> list[str] | None:
+    if not items:
+        return None
+    return [resolve_ref(x) for x in items if str(x).strip()]
+
+
+def enhance_prompt(prompt: str, model: str | None = None) -> dict[str, Any]:
+    body: dict[str, Any] = {"prompt": prompt}
+    if model:
+        body["model"] = model
+    status, data, _ = http("POST", f"{STUDIO}/prompts/enhance", body=body, timeout=60)
+    return {"http": status, "data": data}
+
+
+def studio_sfx(
+    text: str,
+    *,
+    duration_seconds: float | None = None,
+    loop: bool = False,
+    prompt_influence: float | None = None,
+) -> dict[str, Any]:
+    body: dict[str, Any] = {"tool": "sfx", "text": text}
+    if duration_seconds is not None:
+        body["duration_seconds"] = duration_seconds
+    if loop:
+        body["loop"] = True
+    if prompt_influence is not None:
+        body["prompt_influence"] = prompt_influence
+    status, data, _ = http("POST", f"{STUDIO}/audio/generate", body=body, timeout=120)
+    saved = None
+    if isinstance(data, dict):
+        url = data.get("audio_url") or data.get("url")
+        b64 = data.get("audio_base64")
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        dest = OUT_DIR / f"sfx-{int(time.time())}.mp3"
+        if isinstance(url, str) and url:
+            p = save_studio_url(url, dest.stem)
+            saved = p
+        elif isinstance(b64, str) and b64:
+            import base64
+
+            dest.write_bytes(base64.b64decode(b64))
+            saved = str(dest)
+    return {"http": status, "data": data, "saved": saved}
+
+
+def lyrics_enhance(idea: str, style: str | None = None, language: str = "tr") -> dict[str, Any]:
+    body: dict[str, Any] = {"idea": idea, "language": language}
+    if style:
+        body["prompt"] = style
+    status, data, _ = http("POST", f"{STUDIO}/music/lyrics/enhance", body=body, timeout=90)
+    return {"http": status, "data": data}
+
+
+def lyrics_tokenize(lyrics: str) -> dict[str, Any]:
+    status, data, _ = http("POST", f"{STUDIO}/music/tokenize", body={"lyrics": lyrics}, timeout=30)
+    return {"http": status, "data": data}
+
+
+def gateway_status() -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for name, url in (("studio", f"{STUDIO}/status"), ("core", f"{CORE}/status")):
+        status, data, _ = http("GET", url, timeout=20)
+        out[name] = {"http": status, "data": data}
+    return out
+
+
+def model_schema(backend: str, model_id: str) -> dict[str, Any]:
+    backend = (backend or "core").lower()
+    mid = urllib.parse.quote(model_id, safe="")
+    url = f"{STUDIO}/models/{mid}" if backend == "studio" else f"{CORE}/models/{mid}"
+    status, data, _ = http("GET", url, timeout=30)
+    return {"http": status, "backend": backend, "data": data}
+
+
+def embed(texts: list[str], model: str = "text-embedding-3-small") -> dict[str, Any]:
+    status, data, _ = http(
+        "POST",
+        "https://api.claude.gg/v1/embeddings",
+        body={"model": model, "input": texts},
+        timeout=60,
+    )
+    dims = None
+    n = 0
+    if isinstance(data, dict):
+        rows = data.get("data") or []
+        n = len(rows) if isinstance(rows, list) else 0
+        if rows and isinstance(rows[0], dict):
+            emb = rows[0].get("embedding")
+            if isinstance(emb, list):
+                dims = len(emb)
+    return {"http": status, "count": n, "dims": dims, "data": data}
+
+
+def fetch_url(url: str, max_bytes: int = 200_000) -> dict[str, Any]:
+    if not url.startswith("http://") and not url.startswith("https://"):
+        return {"error": "url must be http(s)"}
+    status, data, hdrs = http("GET", url, timeout=25, raw=True)
+    if not isinstance(data, (bytes, bytearray)):
+        return {"http": status, "error": data}
+    raw = bytes(data)[: max(1024, min(int(max_bytes), 500_000))]
+    ctype = hdrs.get("content-type", "")
+    text = raw.decode("utf-8", errors="replace")
+    if "html" in ctype.lower() or text.lstrip()[:15].lower().startswith("<!doctype") or text.lstrip()[:6].lower().startswith("<html"):
+        import re
+
+        text = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", text)
+        text = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", text)
+        text = re.sub(r"(?s)<[^>]+>", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
+    return {"http": status, "content_type": ctype, "chars": len(text), "text": text[:max_bytes]}
+
+
+def jury(
+    prompt: str,
+    models: list[dict[str, str]] | None = None,
+    *,
+    max_tokens: int = 800,
+    system: str | None = None,
+) -> dict[str, Any]:
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    specs = models or [
+        {"gateway": "grok", "model": "grok-4.6-max", "name": "Grok 4.6 Max"},
+        {"gateway": "app", "model": "claude-sonnet-4-6-thinking", "name": "Sonnet 4.6 Thinking"},
+        {"gateway": "api-v2", "model": "ox-alpha", "name": "Ox Alpha"},
+    ]
+    out: list[dict[str, Any]] = []
+
+    def one(spec: dict[str, str]) -> dict[str, Any]:
+        t0 = time.perf_counter()
+        r = chat(
+            spec.get("gateway") or "api-v2",
+            spec["model"],
+            prompt,
+            max_tokens=max_tokens,
+            system=system,
+        )
+        return {
+            "name": spec.get("name") or spec["model"],
+            "gateway": spec.get("gateway"),
+            "model": spec["model"],
+            "ms": int((time.perf_counter() - t0) * 1000),
+            "http": r.get("http"),
+            "text": r.get("text"),
+            "error": None if r.get("text") else dump(r.get("raw"), 800),
+        }
+
+    with ThreadPoolExecutor(max_workers=min(4, len(specs))) as pool:
+        futs = [pool.submit(one, s) for s in specs]
+        for fut in as_completed(futs):
+            try:
+                out.append(fut.result())
+            except Exception as e:
+                out.append({"error": str(e)})
+    out.sort(key=lambda x: str(x.get("name") or ""))
+    return {"prompt_chars": len(prompt), "n": len(out), "results": out}

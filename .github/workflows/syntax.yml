@@ -12,6 +12,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: py_compile
-        run: python -m py_compile hub/server.py mcp/server.py mcp/client.py scripts/probe.py mcp/smoke.py
+        run: python -m py_compile hub/server.py mcp/server.py mcp/client.py scripts/probe.py mcp/smoke.py scripts/mcp_handshake.py scripts/smoke_v11.py scripts/install_opencode.py
       - name: json
         run: python -c "import json,pathlib; json.loads(pathlib.Path('hub/catalog.json').read_text()); json.loads(pathlib.Path('config/opencode.json').read_text()); json.loads(pathlib.Path('examples/cursor-byok-preset.json').read_text())"

@@ -12,6 +12,7 @@ __pycache__/
 venv/
 cortex-out/
 hub/data/
+mcp/_handshake.py
 *.log
 
 # OS / editor

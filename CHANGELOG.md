@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-08-25
+
+- MCP **22 tools** (was 11): fetch, status, model schema, prompt enhance, image refs + Midjourney params, edit (remove-bg/upscale), video omni-ref + wan-2-6, lyrics, SFX, voice-design/clone, jury, embeddings
+- Local paths in `image_urls` / `reference_*` / `first_frame` auto-upload to core (6 h URL)
+- Default music backend is core `music-3` (studio v1 often 400)
+- `scripts/mcp_handshake.py`, `scripts/smoke_v11.py`
+
 ## 0.1.0 — 2026-08-25
 
 - Local Hub on `127.0.0.1:3848`: quota, live catalog, model probe, setup snippets, studio, bug-report markdown
